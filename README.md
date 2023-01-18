@@ -57,6 +57,7 @@ GO
 ![image](https://user-images.githubusercontent.com/31298167/213103901-770f195c-57a5-4ca7-847e-a924e24b0ccf.png)
 
 6.- Creamos dos suscripciones ("notificationSub" para el API de Notificaciones y "categorySub" otra para el API de Categorias) 1 mensaje maximo de entrega
+
 7.- Agregamos un Shared access policy , lo nombramos "sbpolicy" y seleccionamos los scopes de "Send" y "Listen"
 ![image](https://user-images.githubusercontent.com/31298167/213104679-5f5b1c96-a4d0-49b7-8172-c9f72f6bcf89.png)
 
@@ -81,6 +82,7 @@ GO
 ```
 
 10.- Inicializa DAPR, abre una terminal y ejecuta el comando "dapr init", valida que le contenerdor esta ejecutandose en Docker Desktop o por linea de comandos con docker ps
+
 11.- Ve al archivo  pubsub.yaml que se encuentra en "C:\Users\{tu User name}\.dapr\components" y lo reemplazamos con la siguiente especificación :
 ```YAML
 apiVersion: dapr.io/v1alpha1
@@ -112,6 +114,7 @@ dapr run --app-id expensesapi --components-path 'C:\Users\{tu User name}\.dapr\c
 
 ```
 15.- probamos nuestra API y verificamos que envie el mensaje al Service Bus 
+
 16.- procedemos a Contenerizar nuestro aplicativo, para esto agregamos un archivo llamado dockerfile con el siguiente contenido: 
 ```DOCKER
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
@@ -141,7 +144,9 @@ docker build --tag expenseapi .
 ```
 # Notification API (Node JS)
 1.- Vamos a el portal de azure , creamos un recurso Azure Database for MySQL, seleccionamos flexibl server, nombramos con nuestras iniciales mas el posfijo mysql, seleccionamos el tipo de carga para proositos de desarrollo, agregamos nuestra IP
+
 2.- Ingresamos al recurso y creamos una base de datos llamada "expensenotificaciondb"
+
 3.- Ejecutamos el siguiente script para crear la tabla en la base de datos 
 ```SQL
 CREATE TABLE `notification` (
@@ -152,6 +157,7 @@ CREATE TABLE `notification` (
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 ```
 4.- Es importante mencionar que es necesario ejecutar el paso 4,5,6,10,11 de la seccion de Expense API
+
 5.- Abrimos el projecto de API llamado ExpenseAPINode en Visual Studio Code e instalamos el paquete npm "@dapr/dapr" y en el archivo package.json modificamos la sección de scripts con el siguiente segmento: 
 ``` 
   "scripts": {    
@@ -162,6 +168,7 @@ CREATE TABLE `notification` (
   },
 ```
 6.- Eliminamos la carpeta de Routes en el proyecto
+
 7.- Remplazamos el codigo de archivo expenseNotificationController.ts con lo siguiente: 
 ```Node
 import { Request, Response, NextFunction } from 'express'; 
