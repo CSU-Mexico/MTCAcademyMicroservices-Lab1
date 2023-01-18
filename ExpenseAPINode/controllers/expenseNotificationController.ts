@@ -11,13 +11,13 @@ interface Notification {
 //use email service
 function sendEmail(date: Date, amount: Number, category: String) {
     let result: boolean = false;
-    const SENDGRID_API_KEY = "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"
+    const SENDGRID_API_KEY = "XXXXXX"
 
     sendgrid.setApiKey(SENDGRID_API_KEY);
     const content = `<strong> Fecha : ${date}- Monto: $ ${amount.toString()} - Concepto: ${category} </strong>`;  
 
     const msg = {
-        to: 'e_ramirez_martinez@hotmail.com',
+        to: '[correo personal]',
         // Change to your recipient
         from: 'mtcacademyms@outlook.com',
         // Change to your verified sender
