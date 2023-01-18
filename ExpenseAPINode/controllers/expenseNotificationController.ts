@@ -46,7 +46,7 @@ async function registerExpensesNotification (notification: Notification){
         host: "mtcacademymysql.mysql.database.azure.com",
         port:"3306",
         user: "adminadmin",
-        password: ".Microsoft01.",
+        password: "XXXXX",
         database: "expensenotificationdb"
     });
 
