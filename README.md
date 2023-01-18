@@ -94,8 +94,8 @@ spec:
   - name: connectionString # Required when not using Azure Authentication.
     value: "Endpoint=sb://{ServiceBusNamespace}.servicebus.windows.net/;SharedAccessKeyName={PolicyName};SharedAccessKey={Key};EntityPath={ServiceBus}"
   scopes:
-   - expensenotificationservice
-   - expensecatalogservice
+   - notificationSub
+   - categorySub
    - expenseapi
 ```
 12.- Reemplazamos con los datos que tenemos de nuestro recurso de Azure Servibus que creamos previamente
@@ -139,11 +139,10 @@ ENTRYPOINT ["dotnet", "ExpenseApi.dll"]
 ``` 
 docker build --tag expenseapi .
 ```
-#Notification API (Node JS)
+# Notification API (Node JS)
 1.- Vamos a el portal de azure , creamos un recurso Azure Database for MySQL, seleccionamos flexibl server, nombramos con nuestras iniciales mas el posfijo mysql, seleccionamos el tipo de carga para proositos de desarrollo, agregamos nuestra IP
-2.- Ingresamos a las propiedades y deshabilitamos la siguiente opcion en 
-3.- Ingresamos al recurso y creamos una base de datos llamada "expensenotificaciondb"
-4.- Ejecutamos el siguiente script para crear la tabla en la base de datos 
+2.- Ingresamos al recurso y creamos una base de datos llamada "expensenotificaciondb"
+3.- Ejecutamos el siguiente script para crear la tabla en la base de datos 
 ```SQL
 CREATE TABLE `notification` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -152,10 +151,191 @@ CREATE TABLE `notification` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 ```
-5.- Es importante mencionar que es necesario ejecutar el paso 4,5,6,10,11 de la seccion de Expense API
-6.- Abrimos el projecto de API llamado ExpenseAPINode en Visual Studio Code e instalamos el paquete npm "@dapr/dapr"
+4.- Es importante mencionar que es necesario ejecutar el paso 4,5,6,10,11 de la seccion de Expense API
+5.- Abrimos el projecto de API llamado ExpenseAPINode en Visual Studio Code e instalamos el paquete npm "@dapr/dapr" y en el archivo package.json modificamos la sección de scripts con el siguiente segmento: 
+``` 
+  "scripts": {    
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "start": "tsc && node server.js",
+    "start:dapr": "dapr run --app-port 5001 --app-id expensenotificationservice --app-protocol http --dapr-http-port 3501 --components-path 'C://Users//erramire//.dapr//components' -- npm run start"
+  },
+```
+6.- Eliminamos la carpeta de Routes en el proyecto
+7.- Remplazamos el codigo de archivo expenseNotificationController.ts con lo siguiente: 
+```Node
+import { Request, Response, NextFunction } from 'express'; 
+const util = require("util"); 
+const mysql = require('mysql');
+const sendgrid = require('@sendgrid/mail');
 
-#Category Catalog API (Java Spring Boot)
+interface Notification {    
+    NotificationDate: Date;
+    ExpenseId: Number;
+}
+
+interface ExpenseRecord {
+    id: Number;
+    date: Date;
+    amount: Number;
+    category: String;
+
+}
+
+//use email service
+function sendEmail(date: Date, amount: Number, category: String) {
+    let result: boolean = false;
+    const SENDGRID_API_KEY = "XXXXXXX"
+
+    sendgrid.setApiKey(SENDGRID_API_KEY);
+    const content = `<strong> Fecha : ${date}- Monto: $ ${amount.toString()} - Concepto: ${category} </strong>`;  
+
+    const msg = {
+        to: 'XXXX@XXX.com',
+        // Change to your recipient
+        from: 'mtcacademyms@outlook.com',
+        // Change to your verified sender
+        subject: 'Gasto Registrado ',
+        text: `Acabas de realizar un gasto por $ ${amount.toString()} `,
+        html: content,
+    }
+    sendgrid
+        .send(msg)
+        .then((resp) => {
+            console.log('Email sent\n', resp)
+        })
+        .catch((error) => {
+            console.error(error)
+        })
+    result = true;
+    return result;
+}
+
+//register in database 
+async function registerExpensesNotification (notification: Notification){
+
+    let result:boolean = false;
+    
+    var connection = mysql.createConnection({
+        host: "XXXX.mysql.database.azure.com",
+        port:"3306",
+        user: "adminadmin",
+        password: "XXX",
+        database: "expensenotificationdb"
+    });
+
+    connection.query = util.promisify(connection.query).bind(connection);
+
+    connection.connect(function (err) {
+        if (err) {
+            console.log("error connecting: " + err.stack);
+            return;
+        };
+        console.log("connected as... " + connection.threadId);
+    });
+    
+    const postQueryString = `INSERT INTO expensenotificationdb.notification  (NotificationDate, ExpenseId) VALUES (' ${formatDate(notification.NotificationDate)}',${notification.ExpenseId.toString() } )`;  
+
+    const resultquery = await connection.query(postQueryString).catch(err => { throw err });
+    
+    result = true;
+    return result;
+};
+
+async function sendExpenseNotification(data:string) {
+    let expense: ExpenseRecord = JSON.parse(data);
+    let date: Date = expense.date;
+    let amount: Number = expense.amount;
+    let category: String = expense.category;
+    let id: Number = expense.id
+    // sending the email notification
+
+    let resultEmail = sendEmail(date, amount, category);
+
+
+    let currentDate = new Date(Date.now());;
+
+    let notification: Notification = {
+        NotificationDate: currentDate,
+        ExpenseId: id
+    };
+
+    let resultRegister = await registerExpensesNotification(notification);
+
+}
+
+
+function formatDate(date: Date) {
+    return (
+        [
+            date.getFullYear(),
+            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getDate()),
+        ].join('-') +
+        ' ' +
+        [
+            padTo2Digits(date.getHours()),
+            padTo2Digits(date.getMinutes()),
+            padTo2Digits(date.getSeconds()),
+        ].join(':')
+    );
+}
+
+function padTo2Digits(num: number) {
+    return num.toString().padStart(2, '0');
+}
+
+export default { sendExpenseNotification };
+```
+8.- En el archivo server.ts reemplazamos con el siguiente codigo:
+```
+import { DaprServer } from '@dapr/dapr';
+import controller from './controllers/expenseNotificationController';
+
+const DAPR_HOST = process.env.DAPR_HOST || "http://localhost";
+const DAPR_HTTP_PORT = process.env.DAPR_HTTP_PORT || "3501";
+const SERVER_HOST = process.env.SERVER_HOST || "127.0.0.1";
+const SERVER_PORT = process.env.APP_PORT || '5002';
+
+async function main() {
+    const server = new DaprServer(SERVER_HOST, SERVER_PORT, DAPR_HOST, DAPR_HTTP_PORT);
+
+    // Dapr subscription routes orders topic to this route
+    server.pubsub.subscribe("servicebus-pubsub", "expensetopic", async (data) => {
+        console.log("Subscriber received: " + JSON.stringify(data));
+        controller.sendExpenseNotification(JSON.stringify(data));
+    });
+
+    await server.start();
+}
+
+main().catch(e => console.error(e));
+```
+9.- Compilamos con el comando npm run build y posteriormente ejecutamos el siguiente comando: 
+```
+dapr run --app-port 5001 --app-id notificationSub --app-protocol http --dapr-http-port 3501 --components-path 'C:\Users\{username}\.dapr\components' -- npm run start
+```
+
+10.- Una vez que funciono correctamente procedemos a agregar el achivo Dockerfile con el siguiente contenido: 
+```
+FROM node:lts-alpine
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
+RUN npm install --production --silent && mv node_modules ../
+COPY . .
+EXPOSE 5001
+RUN chown -R node /usr/src/app
+USER node
+CMD ["npm", "start"]
+```
+
+11.- Nos posicionamos en una terminar en el directorio donde se encuentra nuestro proyecto y creamos la imagen con el siguiente comando : 
+``` 
+docker build --tag expensenotificationapi .
+```
+
+# Category Catalog API (Java Spring Boot)
 
 
 
