@@ -16,7 +16,7 @@ Como prerequisitos necesitamos:
 * Subscripción de Azure
 * SQL Server Management Studio [https://aka.ms/ssmsfullsetup]
 * Postman [https://dl.pstmn.io/download/latest/win64]
-* MySQL Workbench []
+* MySQL Workbench [https://dev.mysql.com/downloads/file/?id=516912]
 
 Exiten 4 componentes:
 * Portal de Expenses (Web - .Net 7)
