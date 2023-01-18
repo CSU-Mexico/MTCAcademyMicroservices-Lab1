@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-CategoriesApplication<categories>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.expenses.categories.CategoriesApplication",
+            "projectName": "categories",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

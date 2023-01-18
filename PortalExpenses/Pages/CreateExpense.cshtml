@@ -1,0 +1,44 @@
+﻿@page
+@model PortalExpenses.Pages.CreateExpenseModel
+
+@{
+    ViewData["Title"] = "CreateExpense";
+}
+
+<h1>CreateExpense</h1>
+
+<h4>ExpenseRecord</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ExpenseRecord.Date" class="control-label"></label>
+                <input asp-for="ExpenseRecord.Date" class="form-control" />
+                <span asp-validation-for="ExpenseRecord.Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpenseRecord.Amount" class="control-label"></label>
+                <input asp-for="ExpenseRecord.Amount" class="form-control" />
+                <span asp-validation-for="ExpenseRecord.Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpenseRecord.Category" class="control-label"></label>
+                <input asp-for="ExpenseRecord.Category" class="form-control" />
+                <span asp-validation-for="ExpenseRecord.Category" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

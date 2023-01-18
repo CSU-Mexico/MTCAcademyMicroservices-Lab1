@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpenseApi", "ExpenseApi\ExpenseApi.csproj", "{53D89413-88C2-409A-8089-E40CACD48135}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortalExpenses", "PortalExpenses\PortalExpenses.csproj", "{37B62A6A-9AF2-4656-850C-80F7B4AAF8DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53D89413-88C2-409A-8089-E40CACD48135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53D89413-88C2-409A-8089-E40CACD48135}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53D89413-88C2-409A-8089-E40CACD48135}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53D89413-88C2-409A-8089-E40CACD48135}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B62A6A-9AF2-4656-850C-80F7B4AAF8DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B62A6A-9AF2-4656-850C-80F7B4AAF8DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B62A6A-9AF2-4656-850C-80F7B4AAF8DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B62A6A-9AF2-4656-850C-80F7B4AAF8DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6E5DC495-689E-4630-923B-39ED26C51025}
+	EndGlobalSection
+EndGlobal
