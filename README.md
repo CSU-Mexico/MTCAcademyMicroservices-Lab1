@@ -344,7 +344,91 @@ docker build --tag expensenotificationapi .
 
 # Category Catalog API (Java Spring Boot)
 
+1.- Vamos al portal de azure y crea un Azure Cache for Redis , nombralo con tus iniciales y el posfijo "rc" usa el tier Standard C1, habilita el Non-TLS port
+![image](https://user-images.githubusercontent.com/31298167/213138947-bea5336a-f874-4686-a718-e80a55b36c18.png)
+
+2.- Una vez creado, vamos al proyecto de Category Catalog API  y procedemos a actualizar el archivo application.properties. 
+
+3.- En el proyecto vamso al archivo pom.xml y agregamos las siguientes dependencias: 
+```XML
+		<dependency>
+			<groupId>io.dapr</groupId>
+			<artifactId>dapr-sdk-springboot</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.dapr</groupId>
+			<artifactId>dapr-sdk</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
+			<optional>true</optional>
+		</dependency>
+```
+4.- Ejecutamos el comando mvn clean install 
+5.- vamos a la Clase CategoryController.java y remplazamos con el siguiente codigo: 
+```JAVA
+package com.expenses.categories;
+import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.ArrayList;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import io.dapr.Topic;
+import io.dapr.client.domain.CloudEvent;
 
 
+@RestController
+public class CategoryController {
+	@Autowired
+   	private StringRedisTemplate template;    
+
+	@GetMapping("/category")
+	public ResponseEntity<ArrayList<Category>> getCategories() {
+		CategoryRepository repo = new CategoryRepository(template); 
+        return new ResponseEntity<>(repo.getCategories(), HttpStatus.OK);
+	}
+
+	@Topic(name = "expensetopic", pubsubName = "servicebus-pubsub")
+	@PostMapping(value="/category", consumes = MediaType.ALL_VALUE)
+	public ResponseEntity addCategory(@RequestBody(required = false) CloudEvent<Category> cloudEvent) {
+		CategoryRepository repo = new CategoryRepository(template); 
+		try {		
+			repo.addCategory(cloudEvent.getData());
+			return ResponseEntity.ok("SUCCESS");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}		
+	}
+	
+    
+}
+
+```
+6.- Cambiamos al directorio de categories y ejecutamos el comando "mvn clean install"
+7.- Es importante mencionar que es necesario ejecutar el paso 4,5,6,10,11 de la seccion de Expense API
+8.- Ejecutamos el siguiente comando para suscribir el api: 
+```
+ dapr run --app-port 8080 --app-id categorySub --components-path 'C:\Users\{username}\.dapr\components' -- mvn spring-boot:run
+
+```
+9.- Creamos nuestro archivo docker file con el siguiente contenido: 
+```
+FROM openjdk:8-jdk-alpine
+COPY target/categories-0.0.1-SNAPSHOT.jar categories-0.0.1.jar
+ENTRYPOINT ["java","-jar","/categories-0.0.1.jar"]
+```
+10.- Ejecutamos el siguiente comando para generer la imagen de docker
+``` 
+docker build --tag expensecategoryapi .
+```
 
 
