@@ -13,6 +13,8 @@ Como prerequisitos necesitamos:
 * Extension Pack for Java [Extension Pack for Java]
 * Spring Boot Extension Pack [Extension Pack for Java] 
 * Docker Desktop [https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe]
+* Subscripción de Azure
+* SQL Server Management Studio [https://aka.ms/ssmsfullsetup]
 
 Exiten 4 componentes:
 * Portal de Expenses (Web - .Net 7)
@@ -24,3 +26,17 @@ Puedes trabajar en todos los componentes o el que Elijas
 
 # Expense API
 
+1.- Inicie sesión en el portal de Azure y crear un grupo de Recursos , nombralo con tus iniciales mas el posfijo "_rg" y selecciona la región SouthCentralUS ó East US2
+
+![image](https://user-images.githubusercontent.com/31298167/213099891-3230f48d-677c-4f12-8190-b184f5cfb568.png)
+
+2.- Cree un Azure SQL Database (single database), el server debe nombrarse con sus iniciales + el posfijo "-svr", SQL Authentication (indique su password y contraseñna), seleccione DTU como opcionde Compute + Storage,  agregue su IP al firewal de la base de datos y por ultimo agregue una base de datos y nombrela "expensedb"
+
+![image](https://user-images.githubusercontent.com/31298167/213102018-cccc1145-050c-4c43-9d71-25985902a64d.png)
+
+4.- Una vez creada la base de datos , ejecutamos el siguiente script SQL para crear la tabla de Expenses:
+
+
+5.- Cree un Azure Service Bus, nombrelo con sus iniciales y el posfijo "sb" , usando el tier "Standard" 
+
+6.- Clone el proyecto de forma local y vaya al proyecto de Expense API, vaya a la clase 
