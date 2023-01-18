@@ -15,6 +15,7 @@ Como prerequisitos necesitamos:
 * Docker Desktop [https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe]
 * Subscripción de Azure
 * SQL Server Management Studio [https://aka.ms/ssmsfullsetup]
+* Postman [https://dl.pstmn.io/download/latest/win64]
 
 Exiten 4 componentes:
 * Portal de Expenses (Web - .Net 7)
@@ -34,9 +35,28 @@ Puedes trabajar en todos los componentes o el que Elijas
 
 ![image](https://user-images.githubusercontent.com/31298167/213102018-cccc1145-050c-4c43-9d71-25985902a64d.png)
 
-4.- Una vez creada la base de datos , ejecutamos el siguiente script SQL para crear la tabla de Expenses:
+3.- Una vez creada la base de datos , ejecutamos el siguiente script SQL para crear la tabla de Expenses (puede realizarlo desde el Query Editor de la base de datos de Azure o desde SQL Management Studio):
+```SQL
+CREATE TABLE [dbo].[ExpenseRecord](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Date] [datetime] NULL,
+	[Amount] [decimal](18, 2) NULL,
+	[Category] [nvarchar](200) NULL,
+ CONSTRAINT [PK_ExpenseRecord_Id] PRIMARY KEY NONCLUSTERED 
+(
+	[Id] ASC
+)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
 
+```
 
-5.- Cree un Azure Service Bus, nombrelo con sus iniciales y el posfijo "sb" , usando el tier "Standard" 
+4.- Cree un Azure Service Bus, nombrelo con sus iniciales y el posfijo "sb" , usando el tier "Standard" 
+5.- Dentro de Azure Service Bus necesitamos crear un topic para enviar mensajes asincronos cada vez creeemos un nuevo Expense, para esto vamos a Entities -> Topics -> Create Topic, lo nombramos expenseTopic.
+![image](https://user-images.githubusercontent.com/31298167/213103901-770f195c-57a5-4ca7-847e-a924e24b0ccf.png)
+
+6.- Creamos dos suscripciones ("notificationSub" para el API de Notificaciones y "categorySub" otra para el API de Categorias) 1 mensaje maximo de entrega
+7.- Agregamos un Shared access policy , lo nombramos "sbpolicy" y seleccionamos los scopes de "Send" y "Listen"
+![image](https://user-images.githubusercontent.com/31298167/213104679-5f5b1c96-a4d0-49b7-8172-c9f72f6bcf89.png)
 
 6.- Clone el proyecto de forma local y vaya al proyecto de Expense API, vaya a la clase 
